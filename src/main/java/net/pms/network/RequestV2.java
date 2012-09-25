@@ -467,7 +467,7 @@ public class RequestV2 extends HTTPResource {
 				}
 				if (xbox) {
 					LOGGER.debug("DLNA changes for Xbox 360");
-					s = s.replace("PS3 Media Server", "PS3 Media Server [" + profileName + "] : Windows Media Connect");
+					s = s.replace("PS3 Media Server", "Media Server [" + profileName + "] : Windows Media Connect");
 					s = s.replace("<modelName>PMS</modelName>", "<modelName>Windows Media Connect</modelName>");
 					s = s.replace("<serviceList>", "<serviceList>" + CRLF + "<service>" + CRLF
 							+ "<serviceType>urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1</serviceType>" + CRLF
@@ -476,7 +476,7 @@ public class RequestV2 extends HTTPResource {
 							+ "<controlURL>/upnp/mrr/control</controlURL>" + CRLF
 							+ "</service>" + CRLF);
 				} else {
-					s = s.replace("PS3 Media Server", "PS3 Media Server [" + profileName + "]");
+					s = s.replace("PS3 Media Server", "Media Server [" + profileName + "]");
 				}
 
 				if (!mediaRenderer.isPS3()) {
