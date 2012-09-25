@@ -1,6 +1,5 @@
 PS3 Media Server
 ================
-Luke
 by shagrath
 
 PS3 Media Server is a cross-platform DLNA-compliant UPnP Media Server.
