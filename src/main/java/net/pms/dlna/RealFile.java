@@ -32,14 +32,17 @@ import java.util.ArrayList;
 
 public class RealFile extends MapFile {
 	private static final Logger logger = LoggerFactory.getLogger(RealFile.class);
-
+	private File f;
 	public RealFile(File file) {
-		getConf().getFiles().add(file);
+		this.f=file;
+		
 		setLastModified(file.lastModified());
+		
+		 
 	}
 
 	public RealFile(File file, String name) {
-		getConf().getFiles().add(file);
+		this.f=file;
 		getConf().setName(name);
 		setLastModified(file.lastModified());
 	}
@@ -104,7 +107,7 @@ public class RealFile extends MapFile {
 	}
 
 	public File getFile() {
-		return getConf().getFiles().get(0);
+		return this.f;
 	}
 
 	@Override
@@ -146,6 +149,24 @@ public class RealFile extends MapFile {
 	@Override
 	public void resolve() {
 		File file = getFile();
+		boolean hasIso = false;
+		for (File folder : file.listFiles())
+		{
+		if(folder.isDirectory())
+		 for (File child_file : folder.listFiles(new FilenameFilter() { 
+             public boolean accept(File dir, String filename)
+              { return filename.toLowerCase().endsWith(".iso"); }
+})) {
+			  DVDISOTitle fi = new DVDISOTitle(child_file, 1);
+			  addChild(fi);
+			 
+			  
+		  }
+		}
+		
+		if(!hasIso)
+		getConf().getFiles().add(file);
+		
 		if (file.isFile() && file.exists() && (getMedia() == null || !getMedia().isMediaparsed())) {
 			boolean found = false;
 			InputFile input = new InputFile();

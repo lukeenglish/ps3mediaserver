@@ -29,7 +29,7 @@ import java.io.File;
 import java.util.List;
 
 public class DVDISOFile extends VirtualFolder {
-	public static final String PREFIX = "[DVD ISO] ";
+	public static final String PREFIX = "";
 
 	@Override
 	public void resolve() {

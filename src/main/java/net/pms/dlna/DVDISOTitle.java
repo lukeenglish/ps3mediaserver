@@ -233,7 +233,7 @@ public class DVDISOTitle extends DLNAResource {
 
 	@Override
 	public String getName() {
-		return "Title " + title;
+		return f.getParentFile().getName();
 	}
 
 	@Override
