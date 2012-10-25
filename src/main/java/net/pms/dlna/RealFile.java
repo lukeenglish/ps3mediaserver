@@ -149,6 +149,7 @@ public class RealFile extends MapFile {
 	@Override
 	public void resolve() {
 		File file = getFile();
+
 		boolean hasIso = false;
 		for (File folder : file.listFiles())
 		{
@@ -168,8 +169,6 @@ public class RealFile extends MapFile {
 		getConf().getFiles().add(file);
 		
 		if (file.isFile() && file.exists() && (getMedia() == null || !getMedia().isMediaparsed())) {
-
-		if (file.isFile() && (getMedia() == null || !getMedia().isMediaparsed())) {
 
 			boolean found = false;
 			InputFile input = new InputFile();
