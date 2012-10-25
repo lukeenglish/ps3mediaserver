@@ -22,6 +22,7 @@ import com.sun.jna.Platform;
 
 import net.pms.io.SystemUtils;
 import net.pms.Messages;
+import net.pms.util.FileUtil;
 import net.pms.util.PropertiesUtil;
 
 import org.apache.commons.configuration.Configuration;
@@ -56,6 +57,9 @@ public class PmsConfiguration {
 	// MEncoder has a hardwired maximum of 8 threads for -lavcopts and -lavdopts:
 	// https://code.google.com/p/ps3mediaserver/issues/detail?id=517
 	private static final int MENCODER_MAX_THREADS = 8;
+
+	// TODO: Get this out of here
+	private static boolean avsHackLogged = false;
 
 	private static final String KEY_ALTERNATE_SUBS_FOLDER = "alternate_subs_folder";
 	private static final String KEY_ALTERNATE_THUMB_FOLDER = "alternate_thumb_folder";
@@ -293,7 +297,7 @@ public class PmsConfiguration {
 			// if it exists, we know whether it's a file or directory
 			// otherwise, it must be a file since we don't autovivify directories
 
-			if (f.exists() && f.isDirectory()) {
+			if (f.isDirectory()) {
 				PROFILE_DIRECTORY = FilenameUtils.normalize(f.getAbsolutePath());
 				PROFILE_PATH = FilenameUtils.normalize(new File(f, DEFAULT_PROFILE_FILENAME).getAbsolutePath());
 			} else { // doesn't exist or is a file (i.e. not a directory)
@@ -373,15 +377,24 @@ public class PmsConfiguration {
 		if (loadFile) {
 			File pmsConfFile = new File(PROFILE_PATH);
 
-			if (pmsConfFile.isFile() && pmsConfFile.canRead()) {
-				configuration.load(PROFILE_PATH);
+			if (pmsConfFile.isFile()) {
+				if (FileUtil.isFileReadable(pmsConfFile)) {
+					configuration.load(PROFILE_PATH);
+				} else {
+					LOGGER.warn("Can't load {}", PROFILE_PATH);
+				}
 			} else if (SKEL_PROFILE_PATH != null) {
                 File pmsSkelConfFile = new File(SKEL_PROFILE_PATH);
-                if (pmsSkelConfFile.isFile() && pmsSkelConfFile.canRead()) {
-                    // load defaults from skel file, save them later to PROFILE_PATH
-                    configuration.load(pmsSkelConfFile);
-                    LOGGER.info("Default configuration loaded from " + SKEL_PROFILE_PATH);
-                }
+
+				if (pmsSkelConfFile.isFile()) {
+					if (FileUtil.isFileReadable(pmsSkelConfFile)) {
+						// load defaults from skel file, save them later to PROFILE_PATH
+						configuration.load(pmsSkelConfFile);
+						LOGGER.info("Default configuration loaded from " + SKEL_PROFILE_PATH);
+					} else {
+						LOGGER.warn("Can't load {}", SKEL_PROFILE_PATH);
+					}
+				}
             }
 		}
 
@@ -540,12 +553,7 @@ public class PmsConfiguration {
 	 * @return The hostname if it is defined, otherwise <code>null</code>.
 	 */
 	public String getServerHostname() {
-		String value = getString(KEY_SERVER_HOSTNAME, "");
-		if (StringUtils.isNotBlank(value)) {
-			return value;
-		} else {
-			return null;
-		}
+		return getString(KEY_SERVER_HOSTNAME, null);
 	}
 
 	/**
@@ -1026,7 +1034,7 @@ public class PmsConfiguration {
 	 * @return The character encoding.
 	 */
 	public String getMencoderSubCp() {
-		return getString(KEY_MENCODER_SUB_CP, StringUtils.EMPTY);
+		return getString(KEY_MENCODER_SUB_CP, "");
 	}
 
 	/**
@@ -1796,8 +1804,6 @@ public class PmsConfiguration {
 		Collections.addAll(output, StringUtils.split(input, LIST_SEPARATOR));
 		return output;
 	}
-	// TODO: Get this out of here
-	private static boolean avsHackLogged = false;
 
 	// TODO: Get this out of here
 	private static List<String> hackAvs(SystemUtils registry, List<String> input) {
@@ -1808,9 +1814,11 @@ public class PmsConfiguration {
 					LOGGER.info("AviSynth is not installed. You cannot use " + engineId + " as a transcoding engine.");
 					avsHackLogged = true;
 				}
+
 				toBeRemoved.add(engineId);
 			}
 		}
+
 		List<String> output = new ArrayList<String>();
 		output.addAll(input);
 		output.removeAll(toBeRemoved);
